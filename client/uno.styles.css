@@ -1,0 +1,1034 @@
+/**
+ * ============================================================================
+ * ARQUIVO: uno.styles.css
+ * LOCAL: client/src/features/games/uno/uno.styles.css
+ * ============================================================================
+ *
+ * DESCRIÇÃO:
+ * Estilos específicos do Uno.
+ *
+ * RESPONSABILIDADES:
+ * - Fundo decorativo com cartas usado no login e no menu.
+ * - Modais de cor do coringa e de resultado.
+ * - Cartas (frente, cores, cantos, oval e símbolo; e verso) e mesa de jogo: oponentes, monte, descarte, sentido, mão e gaveta de chat.
+ *
+ * DATA DE CRIAÇÃO: 07/11/2026 (extraído de client/src/style.css).
+ *
+ * ATUALIZAÇÕES:
+ * - 09/11/2026: Barra do jump-in e giro das setas sem animação CSS (uno.motion.js); setas em cor sólida; carta que vira em voo (.flip3); +N menor e mais alto no PC; pizza e chips clicáveis no PC (escolha sem janela).
+ * - 09/11/2026: Corrigido o clique da pizza clicável do PC (seletor .fxpos.pickable) e halo/hover baratos nela, sem drop-shadow grande no SVG.
+ * - 09/11/2026: Pizza de cores em vetor sem transform 3D (.fxsym.wheel), modais de escolha mais abaixo e fim da nota de texto do topo (.unonote).
+ * - 09/11/2026: Símbolos das cartas especiais (.fxsym/.fxpos) e +N fixo (.pendingbig) com o mesmo molde.
+ * - 09/11/2026: Modais de cor/alvo acima da camada de animações (z-index 100); coringa colorido continua colorido embaixo do monte (.fx-fly .uc.wild.tinted); no PC, leque mais alto e efeitos/tremida mais fortes.
+ * - 09/11/2026: Sem carta cinza de bloqueio (só o leque cinza, com transição); modais de cor/alvo no centro da tela; brilho do 0/7 menor; pizza mais sóbria.
+ * - 09/11/2026: .discard::before dá profundidade ao montante (carta de baixo menor e girada).
+ * - 09/11/2026: Palavra UNO 3D permanente (.unoflag), explosão de UNO na jogada (.unofx) e botão de denúncia "!" (.reportbtn) ao lado do botão UNO.
+ * - 08/11/2026: Contagem do turno com pulso por segundo (uclockPulse) no lugar do pulso contínuo.
+ * - 07/11/2026: Extraído de style.css (fundo, coringa/resultado, cartas e mesa).
+ * - 07/11/2026: Restauradas as regras de face das cartas (.uc.<cor>, .corner, .oval e .big), ausentes no style.css recebido; reconstruídas a partir do HTML de uno.cards.js.
+ *
+ * AUTOR: Viana-78
+ *
+ * ============================================================================
+ */
+
+/* fundo com cartas decorativas */
+.bgcards {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background: radial-gradient(
+        ellipse at 50% 30%,
+        #1c6b4d 0,
+        #0e3a2a 45%,
+        #07150e 100%
+    );
+}
+.bgc {
+    position: absolute;
+    --cw: 92px;
+    transform: rotate(var(--r)) translate(-50%, -50%);
+    opacity: 0.22;
+    animation: float 9s ease-in-out infinite;
+}
+.bgc:nth-child(2n) {
+    animation-delay: -3s;
+}
+.bgc:nth-child(3n) {
+    animation-delay: -6s;
+}
+@keyframes float {
+    50% {
+        transform: rotate(var(--r)) translate(-50%, -50%) translateY(-14px);
+    }
+}
+
+/* cor do coringa e resultado */
+.colors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.colorbtn {
+    height: 96px;
+    border-radius: 18px;
+    background: var(--cc);
+    border: 4px solid #fff;
+    font-weight: 900;
+    font-size: 18px;
+    color: #fff;
+    text-shadow: 0 2px 4px #0008;
+    transition: transform 0.12s;
+}
+.colorbtn:hover {
+    transform: scale(1.04);
+}
+.winner {
+    text-align: center;
+    font-size: 20px;
+    margin: 6px 0 14px;
+}
+.scores {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #0b1e15;
+    border-radius: 12px;
+}
+.score b {
+    flex: 1;
+}
+.score em {
+    font-style: normal;
+    color: var(--muted);
+}
+
+/* ===== CARTAS ===== */
+
+.uc {
+    position: relative;
+    flex: none;
+    width: var(--cw);
+    aspect-ratio: 2/3;
+    border-radius: calc(var(--cw) * 0.12);
+    background: var(--cc);
+    border: calc(var(--cw) * 0.05) solid #fff;
+    box-shadow: 0 3px 8px #0007;
+    color: #fff;
+    overflow: hidden;
+
+    /* Impede seleção de texto e menus de seleção por toque */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Protege também os elementos internos das cartas */
+.uc * {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Face da carta: a cor de fundo vem de --cc, definida pela classe da cor. */
+.uc.red {
+    --cc: var(--red);
+}
+.uc.yellow {
+    --cc: var(--yellow);
+}
+.uc.green {
+    --cc: var(--green);
+}
+.uc.blue {
+    --cc: var(--blue);
+}
+.uc.wild {
+    --cc: #161616;
+}
+
+/* Valor nos cantos superior esquerdo e inferior direito. */
+.uc .corner {
+    position: absolute;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 1;
+    font-size: calc(var(--cw) * 0.2);
+    text-shadow: 0 1px 2px #0006;
+}
+.uc .corner.tl {
+    top: 6%;
+    left: 9%;
+}
+.uc .corner.br {
+    bottom: 6%;
+    right: 9%;
+    transform: rotate(180deg);
+}
+
+/* Oval branca central, inclinada como no baralho tradicional. */
+.uc .oval {
+    position: absolute;
+    inset: 14% 8%;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    transform: rotate(-24deg);
+}
+.uc .big {
+    font-family: "Arial Black", Impact, sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    font-size: calc(var(--cw) * 0.42);
+    color: var(--cc);
+    transform: rotate(24deg);
+}
+
+/* Coringa: oval com as quatro cores e símbolo branco. */
+.uc.wild .oval {
+    background: conic-gradient(
+        var(--red) 0 25%,
+        var(--blue) 0 50%,
+        var(--green) 0 75%,
+        var(--yellow) 0 100%
+    );
+}
+.uc.wild .big {
+    color: #fff;
+    text-shadow: 0 2px 4px #000a;
+}
+.ub {
+    position: relative;
+    flex: none;
+    width: var(--mw);
+    aspect-ratio: 2/3;
+    border-radius: calc(var(--mw) * 0.14);
+    background: linear-gradient(160deg, #2a2a2a, #0e0e0e);
+    border: calc(var(--mw) * 0.07) solid #fff;
+    box-shadow: 0 2px 5px #0008;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+.ub::before {
+    content: "";
+    position: absolute;
+    inset: 16% 6%;
+    background: var(--red);
+    border-radius: 50%;
+    transform: rotate(-24deg);
+}
+.ub span {
+    position: relative;
+    font-family: "Arial Black", Impact, sans-serif;
+    font-weight: 900;
+    font-size: calc(var(--mw) * 0.34);
+    color: var(--yellow);
+    text-shadow: 0 1px 0 #000;
+    transform: rotate(-24deg);
+}
+
+/* ===== MESA ===== */
+.screen.game {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100dvh;
+    min-height: 0;
+    padding: 10px 12px 8px;
+    gap: 6px;
+    background: radial-gradient(ellipse at 50% 40%, #10382a 0, #08170f 75%);
+}
+.gbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+.gbar b {
+    display: block;
+}
+.gbar small {
+    display: block;
+}
+.table {
+    position: relative;
+    min-height: 0;
+}
+.felt {
+    position: absolute;
+    inset: 3% 2% 4%;
+    border-radius: 50%;
+    background: radial-gradient(
+        ellipse at 50% 45%,
+        #1d7552 0,
+        var(--felt) 45%,
+        var(--felt2) 100%
+    );
+    border: 10px solid #3a2415;
+    box-shadow:
+        inset 0 0 60px #0008,
+        0 10px 40px #000a,
+        0 0 0 3px #5b3a22;
+}
+
+/* Assento = âncora de tamanho zero (sem transform nem z-index): o conteúdo se centra sozinho e não forma camada própria,
+   assim o chip de TODOS os jogadores (z-index 3) fica sempre acima das cartas de qualquer assento (z-index 2). */
+.seat {
+    position: absolute;
+    width: 0;
+    height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+.seat > * { width: max-content; flex: none; white-space: nowrap; }
+.minihand {
+    position: relative;
+    z-index: 2;
+    height: calc(var(--mw) * 1.5);
+    margin-top: 4px;
+}
+.minihand .ub {
+    position: absolute;
+    top: 0;
+    transform-origin: 50% 120%;
+}
+.nameplate {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 5px;
+    border-radius: 99px;
+    background: #0a1a12ee;
+    border: 2px solid var(--line);
+    max-width: 170px;
+    font-size: 13px;
+    position: relative;
+}
+.nameplate b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 90px;
+}
+.nameplate .cnt {
+    font-style: normal;
+    font-weight: 800;
+    font-size: 12px;
+    min-width: 20px;
+    text-align: center;
+    border-radius: 99px;
+    background: #fff2;
+    padding: 1px 6px;
+}
+.unoflag {
+    position: absolute;
+    top: -24px;
+    right: -16px;
+    z-index: 4;
+    pointer-events: none;
+    font: 900 20px/1 'Arial Black', Impact, system-ui, sans-serif;
+    letter-spacing: 1px;
+    color: #ffd21f;
+    -webkit-text-stroke: 3px #17110a;
+    paint-order: stroke fill;
+    text-shadow: 0 2px 0 #b36b00, 0 4px 0 #17110a, 0 7px 9px rgba(0, 0, 0, .6);
+    transform: rotate(-8deg) skewX(-4deg);
+    animation: unoFlagPop 1s ease-in-out infinite alternate;
+}
+/* Estrelinhas coloridas ao lado da palavra */
+.unoflag::before, .unoflag::after {
+    content: '';
+    position: absolute;
+    width: 9px; height: 9px;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+.unoflag::before { left: -9px; top: -3px; background: #e53935; }
+.unoflag::after { right: -8px; bottom: -2px; background: #1e88e5; }
+.nameplate.me .unoflag { font-size: 26px; top: -30px; right: -20px; }
+@keyframes unoFlagPop {
+    from { transform: rotate(-8deg) skewX(-4deg) scale(1); filter: drop-shadow(0 0 3px #ffd21f); }
+    to { transform: rotate(-5deg) skewX(-4deg) scale(1.12); filter: drop-shadow(0 0 10px #ffd21f); }
+}
+.seat.turn .nameplate,
+.mine.turn .nameplate.me {
+    border-color: var(--gold);
+    box-shadow:
+        0 0 0 2px #ffcc3355,
+        0 0 18px #ffcc3388;
+    animation: glow 1.4s ease-in-out infinite;
+}
+.seat.turn .minihand {
+    filter: drop-shadow(0 0 6px #ffcc33aa);
+}
+@keyframes glow {
+    50% {
+        box-shadow:
+            0 0 0 4px #ffcc3333,
+            0 0 26px #ffcc33cc;
+    }
+}
+@keyframes pulse {
+    50% {
+        transform: rotate(8deg) scale(1.12);
+    }
+}
+
+.tcenter {
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--cw) * 0.3);
+    z-index: 1;
+}
+.pile {
+    position: relative;
+    width: var(--cw);
+    aspect-ratio: 2/3;
+    cursor: pointer;
+}
+.pile .pc {
+    --mw: var(--cw);
+    position: absolute;
+    inset: 0;
+    width: var(--cw);
+}
+.pile .p1 {
+    transform: translate(0, 0);
+}
+.pile .p2 {
+    transform: translate(-3px, -3px);
+}
+.pile .p3 {
+    transform: translate(-6px, -6px);
+}
+.pile .ub span {
+    font-size: calc(var(--cw) * 0.3);
+}
+.pile:hover .p1 {
+    transform: translate(2px, 2px);
+}
+.pile .cnt {
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 800;
+    background: #0a1a12;
+    border: 1px solid var(--line);
+    padding: 1px 9px;
+    border-radius: 99px;
+}
+.pile.hint .p1 {
+    animation: nudge 1s ease-in-out infinite;
+    box-shadow:
+        0 0 0 3px var(--gold),
+        0 0 20px var(--gold);
+}
+@keyframes nudge {
+    50% {
+        transform: translateY(-6px);
+    }
+}
+.discard { position: relative; }
+/* Carta de baixo do montante: menor, girada e deslocada, para dar profundidade (a carta de cima fica por cima) */
+.discard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: calc(var(--cw) * 0.12);
+    background: #f1f1f1;
+    box-shadow: 0 3px 8px #0009;
+    transform: translate(-5px, -3px) rotate(7deg) scale(.94);
+}
+.discard .uc {
+    box-shadow:
+        0 0 0 4px var(--c),
+        0 0 26px var(--c),
+        0 6px 14px #000a;
+    transform: rotate(-4deg);
+    transition: box-shadow 0.3s;
+}
+/* O topo do descarte permanece estático durante compras e atualizações de estado. */
+.dirbox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.dir {
+    font-size: calc(var(--cw) * 0.5);
+    line-height: 1;
+    color: #ffffffaa;
+}
+/* O giro (e o sentido) da setinha vêm de uno.motion.js: animação CSS é desligada pela opção "Animações" */
+.dir {
+    display: block;
+    will-change: transform;
+}
+.curcolor {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 10px #0008;
+}
+
+.mine {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-top: 2px;
+}
+.turnpill {
+    padding: 5px 16px;
+    border-radius: 99px;
+    background: #0a1a12ee;
+    border: 1px solid var(--line);
+    font-weight: 700;
+    font-size: 14px;
+}
+.turnpill.me {
+    background: var(--gold);
+    color: #2b1f00;
+    border-color: var(--gold);
+    animation: pulse2 1.2s infinite;
+}
+@keyframes pulse2 {
+    50% {
+        transform: scale(1.06);
+    }
+}
+.hand {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    min-height: calc(var(--cw) * 1.5 + 22px);
+    padding: 18px 4px 0;
+    width: 100%;
+
+    /* Impede seleção acidental na mão do jogador */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+.hand .uc {
+    cursor: pointer;
+    transition:
+        transform 0.15s,
+        filter 0.15s,
+        box-shadow 0.15s;
+}
+.hand .uc:hover {
+    transform: translateY(-14px);
+    z-index: 5;
+}
+.hand .uc.playable {
+    transform: translateY(-10px);
+    box-shadow:
+        0 0 0 3px var(--gold),
+        0 6px 16px #000a;
+}
+.hand .uc.playable:hover {
+    transform: translateY(-22px);
+}
+.hand .uc.dim {
+    filter: brightness(0.55) saturate(0.7);
+}
+
+.chatdrawer {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    z-index: 40;
+    width: min(300px, calc(100vw - 20px));
+    background: #0e2519f2;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 10px 40px #000a;
+}
+.chatdrawer .mhead {
+    margin-bottom: 8px;
+}
+.chatdrawer h3 {
+    font-size: 16px;
+}
+
+@media (max-width: 700px) {
+    .nameplate {
+        font-size: 11px;
+        padding: 3px 8px 3px 4px;
+    }
+    .nameplate b {
+        max-width: 56px;
+    }
+    .nameplate .avatar {
+        display: none;
+    }
+    .felt {
+        border-width: 6px;
+    }
+}
+
+/* ----- Animações (camada fixa criada por shared/animations/card-fx.js) ----- */
+#fx-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+}
+.fx-fly {
+    position: fixed;
+    will-change: transform;
+}
+.fx-fly > * {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+/* Carta que sai de costas e vira no caminho (distribuição e compra das minhas cartas): duas faces uma sobre a outra */
+.fx-fly.flipper { perspective: 700px; }
+.flip3 { position: relative; transform-style: preserve-3d; }
+.flip3 > div { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip3 > .fl-f { transform: rotateY(180deg); }
+.flip3 > div > * { width: 100%; height: 100%; margin: 0; }
+.fx-badge {
+    position: fixed;
+    min-width: 54px;
+    padding: 8px 12px;
+    border-radius: 99px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 26px;
+    color: #fff;
+    background: #d32f2f;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 16px #000a;
+}
+.fx-badge.block {
+    background: #1b1b1b;
+    font-size: 34px;
+    padding: 6px 14px;
+}
+.fx-badge.plus {
+    background: linear-gradient(135deg, #d32f2f, #1d6fd1);
+}
+
+.mystat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mycount {
+    padding: 5px 12px;
+    border-radius: 99px;
+    background: #0a1a12ee;
+    border: 1px solid var(--line);
+    font-weight: 800;
+    font-size: 14px;
+}
+.mycount.uno {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* Aura amarela de UNO (1 carta na mão) */
+.seat.uno .minihand, .seat.uno .nameplate {
+    filter: drop-shadow(0 0 10px #ff1744) drop-shadow(0 0 22px rgba(255, 23, 68, .75));
+    animation: unoGlow 1.4s ease-in-out infinite alternate;
+}
+@keyframes unoGlow { from { filter: drop-shadow(0 0 6px #ff1744); } to { filter: drop-shadow(0 0 16px #ff5c7a) drop-shadow(0 0 28px rgba(255, 23, 68, .9)); } }
+
+/* Botão UNO (oval vermelha com a palavra amarela) e denúncia (balão azul "!"): canto inferior direito da tela */
+@keyframes unoPulse { to { transform: rotate(-14deg) scale(1.08); } }
+@keyframes reportPulse { to { transform: scale(1.1); } }
+.unocorner { position: fixed; right: 22px; bottom: 22px; z-index: 30; display: flex; flex-direction: column-reverse; align-items: center; gap: 14px; }
+.unocorner .unobtn {
+    width: 128px; height: 80px; padding: 0; border-radius: 50%; border: 4px solid #fff; cursor: pointer;
+    background: radial-gradient(ellipse at 38% 28%, #ff6a45 0%, #e32119 55%, #a80d0d 100%);
+    box-shadow: 0 7px 0 #6d0808, 0 11px 16px rgba(0, 0, 0, .55), 0 0 22px rgba(255, 210, 31, .6);
+    font: 900 38px/1 'Arial Black', Impact, system-ui, sans-serif; letter-spacing: -.02em; color: #ffd21f;
+    -webkit-text-stroke: 2.5px #17110a; paint-order: stroke fill; text-shadow: 0 3px 0 #b36b00, 0 5px 0 #17110a;
+    transform: rotate(-14deg); animation: unoPulse .9s ease-in-out infinite alternate;
+}
+.unocorner .unobtn:active { transform: rotate(-14deg) translateY(4px); box-shadow: 0 3px 0 #6d0808, 0 5px 8px rgba(0, 0, 0, .5); }
+.uno-consume-fx {
+    position: fixed;
+    z-index: 76;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+}
+.uno-consume-ring, .uno-consume-core {
+    position: absolute;
+    inset: -12%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,230,.95) 0%, rgba(255,214,47,.68) 28%, rgba(255,158,20,.2) 58%, transparent 72%);
+    filter: blur(2px);
+}
+.uno-consume-ring {
+    inset: -25%;
+    border: 3px solid rgba(255,238,155,.95);
+    background: transparent;
+    box-shadow: 0 0 16px 8px rgba(255,220,78,.8), inset 0 0 18px rgba(255,255,255,.7);
+}
+.uno-consume-fx b {
+    position: relative;
+    color: #fff4a8;
+    font: 900 clamp(22px, 3vw, 36px)/1 'Arial Black', Impact, sans-serif;
+    -webkit-text-stroke: 2px #991b12;
+    paint-order: stroke fill;
+    text-shadow: 0 0 12px #fff, 0 0 24px #ffca28, 0 3px 0 #8c120d;
+}
+.uno-report-bubble {
+    position: fixed;
+    z-index: 76;
+    width: 76px;
+    height: 76px;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    background: #17120a;
+    clip-path: polygon(50% 0%,58% 15%,73% 4%,76% 21%,94% 16%,89% 34%,100% 47%,85% 57%,96% 74%,77% 77%,76% 97%,59% 87%,48% 100%,39% 84%,21% 94%,22% 75%,3% 70%,14% 53%,0% 40%,17% 31%,8% 12%,29% 18%,39% 1%);
+    filter: drop-shadow(0 4px 3px #000b);
+}
+.uno-report-bubble::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: radial-gradient(circle at 35% 28%, #fff89a 0%, #ffe43d 48%, #ffad16 100%);
+    clip-path: inherit;
+}
+.uno-report-bubble span {
+    position: relative;
+    z-index: 1;
+    color: #e32620;
+    font: 900 58px/.9 'Arial Black', Impact, sans-serif;
+    -webkit-text-stroke: 2px #7d130f;
+    paint-order: stroke fill;
+    text-shadow: 0 3px 0 #fff2a4, 0 5px 0 #1b1209;
+}
+.uno-report-plus {
+    position: fixed;
+    z-index: 76;
+    width: 96px;
+    height: 96px;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    isolation: isolate;
+}
+.uno-report-plus::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    z-index: -1;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(150,255,255,.78) 0%, rgba(72,191,255,.35) 34%, rgba(157,87,255,.2) 58%, transparent 76%);
+    filter: blur(5px);
+}
+.uno-report-plus i {
+    position: absolute;
+    inset: 7px 0;
+    border: 3px solid rgba(161,255,255,.92);
+    border-left-color: rgba(187,130,255,.2);
+    border-right-color: rgba(255,226,117,.8);
+    border-radius: 48% 52% 45% 55%;
+    box-shadow: 0 0 12px #86faff, inset 0 0 14px rgba(185,128,255,.7);
+}
+.uno-report-plus b {
+    position: relative;
+    z-index: 1;
+    color: #fff234;
+    font: 900 68px/1 'Arial Black', Impact, sans-serif;
+    -webkit-text-stroke: 3px #202015;
+    paint-order: stroke fill;
+    text-shadow: 0 4px 0 #bc321b, 0 8px 12px #000c, 0 0 18px #fff1a6;
+}
+.uno-report-plus .spark-a, .uno-report-plus .spark-b {
+    position: absolute;
+    z-index: 2;
+    color: #e9ffff;
+    font: 900 28px/1 Arial, sans-serif;
+    text-shadow: 0 0 8px #72faff, 0 0 16px #bd8cff;
+}
+.uno-report-plus .spark-a { left: 1px; top: 14px; }
+.uno-report-plus .spark-b { right: 0; top: 25px; color: #fff0a6; }
+
+.unocorner .reportbtn {
+    width: 60px; height: 58px; padding: 0; border-radius: 48% 52% 46% 54%; border: 3px solid #0d3a66; cursor: pointer;
+    background: linear-gradient(#6fd0ff, #1e88e5 70%, #1565c0); color: #fff;
+    font: 900 34px/1 'Arial Black', Impact, system-ui, sans-serif; text-shadow: 0 2px 0 #0d3a66, 0 4px 0 rgba(0, 0, 0, .35);
+    box-shadow: 0 5px 0 #0d3a66, 0 9px 12px rgba(0, 0, 0, .5); animation: reportPulse .9s ease-in-out infinite alternate;
+}
+@media (max-width: 700px) {
+    .unocorner { right: 10px; bottom: 150px; }
+    .unocorner .unobtn { width: 96px; height: 60px; font-size: 28px; }
+}
+
+/* Explosão UNO acionada exclusivamente pelo botão; o selo do chip surge após a animação. */
+.unofx { position: fixed; z-index: 70; pointer-events: none; transform: translate(-50%, -50%); font-size: calc(112px * var(--k, 1)); }
+.unofx-word {
+    position: relative; display: block; opacity: 0;
+    font: 900 1em/1 'Arial Black', Impact, system-ui, sans-serif; letter-spacing: .03em;
+    color: #ffd21f; -webkit-text-stroke: .07em #17110a; paint-order: stroke fill;
+    text-shadow: 0 .04em 0 #b36b00, 0 .08em 0 #17110a, 0 .14em .12em rgba(0, 0, 0, .55);
+}
+.unofx-star {
+    position: absolute; left: 50%; top: 50%; width: calc(var(--s) * var(--k, 1)); height: calc(var(--s) * var(--k, 1));
+    background: var(--c); opacity: 0;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+/* +N grande e faixa de decisão (desafiar/aceitar, jogar/guardar) */
+.pendingbig { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); z-index: 4; pointer-events: none; }
+/* Símbolos das cartas especiais (+N, bloqueio, inversão): um molde só, a cor vem de --sc */
+.fxpos { position: fixed; z-index: 65; pointer-events: none; transform: translate(-50%, -50%); }
+/* Símbolos grandes e "3D": o volume vem de camadas empilhadas numa cor mais escura (--sd) e a inclinação do .tilt */
+.fxsym { --sd: color-mix(in srgb, var(--sc, #fff) 50%, #000); font-size: clamp(110px, 26vmin, 230px); line-height: 1; color: var(--sc, #fff); perspective: 700px; }
+.fxsym .tilt { display: block; transform: rotateX(14deg) rotateY(-10deg) rotate(-4deg); transform-style: preserve-3d; }
+.fxsym b {
+    display: block; font: 900 1em/1 'Arial Black', Impact, system-ui, sans-serif; letter-spacing: -.03em;
+    text-shadow: .012em .022em 0 var(--sd), .024em .044em 0 var(--sd), .036em .066em 0 var(--sd), .048em .088em 0 var(--sd),
+        .06em .11em 0 var(--sd), .072em .132em 0 var(--sd), .084em .154em 0 var(--sd),
+        0 .22em .24em rgba(0, 0, 0, .45),
+        /* brilho: antes era só "0 0 .3em color-mix(in srgb, var(--sc, #fff) 70%, transparent)" */
+        0 0 .5em color-mix(in srgb, var(--sc, #fff) 100%, transparent), 0 0 1.05em color-mix(in srgb, var(--sc, #fff) 60%, transparent);
+}
+.fxsym svg {
+    display: block; width: 1.25em; height: 1.1em; overflow: visible;
+    filter: drop-shadow(.012em .022em 0 var(--sd)) drop-shadow(.012em .022em 0 var(--sd)) drop-shadow(.012em .022em 0 var(--sd))
+        drop-shadow(.012em .022em 0 var(--sd)) drop-shadow(.012em .022em 0 var(--sd)) drop-shadow(.012em .022em 0 var(--sd))
+        drop-shadow(.012em .022em 0 var(--sd)) drop-shadow(0 .12em .14em rgba(0, 0, 0, .5))
+        /* brilho: antes era só "drop-shadow(0 0 .22em color-mix(in srgb, var(--sc, #fff) 70%, transparent))" */
+        drop-shadow(0 0 .4em color-mix(in srgb, var(--sc, #fff) 100%, transparent)) drop-shadow(0 0 .85em color-mix(in srgb, var(--sc, #fff) 60%, transparent));
+}
+/* Pizza de cores: vetor com a perspectiva já desenhada; sem transform 3D nem filtros em cascata (bordas nítidas) */
+.fxsym.wheel { font-size: clamp(150px, 34vmin, 280px); perspective: none; }
+.fxsym.wheel .tilt { transform: rotate(-4deg); transform-style: flat; }
+.fxsym.wheel svg { width: 1em; height: .8em; filter: drop-shadow(0 0 .18em rgba(255, 255, 255, .55)) drop-shadow(0 0 .5em rgba(255, 255, 255, .3)); }
+.fxsym.num b {
+    font-size: 1.15em;
+    /* brilho um pouco menor que o dos demais símbolos (o 0/7 fica parado 1 s no meio da mesa) */
+    text-shadow: .012em .022em 0 var(--sd), .024em .044em 0 var(--sd), .036em .066em 0 var(--sd), .048em .088em 0 var(--sd),
+        .06em .11em 0 var(--sd), .072em .132em 0 var(--sd), .084em .154em 0 var(--sd),
+        0 .22em .24em rgba(0, 0, 0, .45),
+        0 0 .3em color-mix(in srgb, var(--sc, #fff) 85%, transparent), 0 0 .62em color-mix(in srgb, var(--sc, #fff) 35%, transparent);
+}
+.fxjump { position: fixed; z-index: 62; pointer-events: none; height: 4px; margin-top: -2px; border-radius: 4px; transform-origin: 0 50%;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .95)); box-shadow: 0 0 10px 2px rgba(255, 255, 255, .55); }
+.fxjump-ring { position: fixed; z-index: 62; pointer-events: none; width: 54px; height: 54px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .9); box-shadow: 0 0 12px rgba(255, 255, 255, .6); }
+.fxaura.core { background: radial-gradient(circle, #fff 0%, color-mix(in srgb, var(--ac) 40%, #fff) 30%, transparent 66%); }
+.fxring { position: fixed; z-index: 60; pointer-events: none; border-radius: 50%; mix-blend-mode: screen;
+    border: 6px solid var(--ac); box-shadow: 0 0 28px 6px var(--ac), inset 0 0 28px 4px var(--ac); }
+.fxaura { position: fixed; z-index: 60; pointer-events: none; border-radius: 50%; mix-blend-mode: screen;
+    background: radial-gradient(circle, var(--ac) 0%, color-mix(in srgb, var(--ac) 55%, transparent) 38%, transparent 68%); }
+/* Bloqueado: só o leque fica cinza, enquanto o símbolo de bloqueio está sobre ele (a classe liga e desliga na animação).
+   A transição suaviza a ida para o cinza e a volta à cor. */
+.seat .minihand .ub { transition: filter .3s ease; }
+.mine .hand .uc { transition: transform .15s, filter .3s ease, box-shadow .15s; }
+.seat.blocked .minihand .ub, .mine.blocked .hand .uc { filter: grayscale(1) brightness(.78); }
+/* Modais de escolha (cor do coringa / alvo do 7): no meio da tela, compactos e com o fundo leve para a mesa continuar visível */
+/* z-index acima da camada de animações (#fx-layer = 60): o modal fica por cima de TUDO, até do 7/pizza parados na mesa */
+.overlay:has(.colors) { z-index: 100; place-items: center; padding: 16px; background: rgba(2, 8, 5, .38); backdrop-filter: none; }
+.modal:has(.colors) { width: min(340px, 100%); padding: 14px 16px 16px; }
+.modal:has(.colors) .mhead { margin-bottom: 10px; }
+.modal:has(.colors) .mhead h2 { font-size: 19px; }
+.modal:has(.colors) .colorbtn { height: 64px; border-width: 3px; border-radius: 14px; font-size: 16px; }
+/* Coringa já com cor escolhida, no descarte: a carta assume a cor (--c do .discard) */
+.discard .uc.wild.tinted, .fx-fly .uc.wild.tinted { --cc: var(--c); }
+.discard .uc.wild.tinted .oval, .fx-fly .uc.wild.tinted .oval { background: #fff; }
+.discard .uc.wild.tinted .big, .fx-fly .uc.wild.tinted .big { color: var(--cc); text-shadow: none; }
+.decband {
+    position: absolute; left: 0; right: 0; top: 56%; z-index: 7;
+    display: flex; justify-content: center; gap: clamp(60px, 22vw, 260px);
+    padding: 10px 0; background: rgba(20, 90, 200, .35);
+    border-top: 2px solid rgba(255, 215, 120, .8); border-bottom: 2px solid rgba(255, 215, 120, .8);
+}
+.dbtn {
+    min-width: 130px; padding: 10px 22px; border: 0; border-radius: 10px; cursor: pointer;
+    font-weight: 800; font-size: 16px; color: #1a1a1a; box-shadow: 0 3px 0 rgba(0, 0, 0, .3);
+}
+.dbtn.red { background: #ff4b3e; } .dbtn.blue { background: #3a86ff; }
+.dbtn.green { background: #5cc83c; } .dbtn.orange { background: #ffa726; }
+
+/* ----- Nameplate do jogador, relógio, intromissão, mãos reveladas e animações novas ----- */
+.seat.win .nameplate { border-color: var(--gold); box-shadow: 0 0 18px #ffcc33aa; }
+
+.uclock {
+    min-width: 38px; padding: 4px 12px; border-radius: 99px; text-align: center;
+    background: #b71c1c; color: #fff; font-weight: 900; font-size: 22px; border: 2px solid #fff;
+    transform-origin: center;
+}
+/* Pulso de cada segundo: sobe com zoom e giro leve para a direita e volta suave (easing em cada trecho) */
+.uclock.tick { animation: uclockPulse .9s both; will-change: transform; }
+@keyframes uclockPulse {
+    0%   { transform: translateY(0) scale(1) rotate(0deg); animation-timing-function: cubic-bezier(.2, .8, .3, 1); }
+    35%  { transform: translateY(-9px) scale(1.22) rotate(9deg); animation-timing-function: cubic-bezier(.45, 0, .25, 1); }
+    100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+.uclock[hidden] { display: none; }
+.uclock.tclock { position: absolute; right: 12px; top: 10px; z-index: 6; }
+.uclock.inmodal { margin: 12px auto 0; width: fit-content; }
+
+/* Barra de 2 s da intromissão */
+.jbar { width: min(320px, 70vw); height: 8px; margin: 0 auto 6px; border-radius: 99px; background: #0007; overflow: hidden; border: 1px solid #ffd40088; }
+/* A barra enche pela escala (scaleX), atualizada por uno.motion.js a cada quadro: não depende de animação CSS (o global.css a desliga) */
+.jbar i { display: block; height: 100%; width: 100%; background: #ffd400; transform: scaleX(0); transform-origin: 0 50%; will-change: transform; }
+
+/* Mãos reveladas no fim da rodada */
+.minihand.faces { height: calc(var(--mw) * 1.25 * 1.5); }
+.minihand .uc.mf { --cw: calc(var(--mw) * 1.25); position: absolute; top: 0; transform-origin: 50% 120%; }
+
+/* Faixas de aviso (desafio, veredito, troca e giro) */
+.fx-banner {
+    position: fixed; left: 50%; top: 34%; transform: translate(-50%, -50%); z-index: 70; text-align: center;
+    padding: 12px 22px; border-radius: 16px; background: rgba(10, 20, 30, .92); color: #fff;
+    border: 2px solid #ffd400; font-size: 20px; box-shadow: 0 8px 30px #000a; max-width: 90vw;
+}
+.fx-banner.ok { border-color: #5cc83c; }
+.fx-banner.no { border-color: #ff4b3e; }
+.fx-banner .vd { font-size: 40px; font-weight: 900; }
+.fx-banner .vd.ok { color: #5cc83c; }
+.fx-banner .vd.no { color: #ff4b3e; }
+
+/* Mão do desafiado (só o desafiante vê): de costas, viram e as da cor do monte sobem */
+.fx-reveal {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 65; text-align: center;
+    padding: 14px 18px 22px; border-radius: 16px; background: rgba(10, 20, 30, .9); border: 2px solid #ffd40099;
+    max-width: 94vw;
+}
+.rv-title { font-weight: 800; margin-bottom: 14px; color: #fff; }
+.rv-cards { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; perspective: 800px; padding-top: 28px; }
+.rv-cards .rvc { --cw: 54px; --mw: 54px; }
+.rvw.hit .uc { box-shadow: 0 0 18px 4px #ffd400; }
+
+/* UNO: brilho vermelho (o amarelo se confunde com a vez) */
+.nameplate { position: relative; z-index: 3; }
+.mine .mystat { position: relative; z-index: 3; }
+
+/* Distribuição: os leques reais só aparecem quando a animação termina */
+.dealing .minihand, .mine.dealing .hand { visibility: hidden; }
+
+.uclock.mclock { position: static; display: inline-block; margin-left: 10px; vertical-align: middle; }
+.uclock.mclock[hidden] { display: none; }
+
+/* Minha mão: fora da vez as cartas ficam um pouco escuras; a carta de intromissão fica clara e mais alta */
+.hand .uc.idle { filter: brightness(0.72) saturate(0.85); }
+.hand .uc.idle:hover { filter: none; }
+
+/* UNO: só a minha última carta solta um brilho vermelho constante (sem caixa em volta da mão) */
+.hand .uc.unocard { animation: unoCardGlow 1.2s ease-in-out infinite alternate; }
+@keyframes unoCardGlow {
+    from { box-shadow: 0 0 10px 2px rgba(255, 23, 68, .75), 0 0 22px 4px rgba(255, 23, 68, .45); }
+    to { box-shadow: 0 0 20px 6px rgba(255, 60, 90, .95), 0 0 40px 12px rgba(255, 23, 68, .6); }
+}
+
+/* ===== Modo leve (PC): telas acima de 900 px =====
+   No PC a área pintada é várias vezes maior que no celular, então os efeitos caros ficam mais baratos SEM mudar a cara:
+   menos camadas de sombra nos símbolos, aura sem mistura de cores (mix-blend-mode), brilhos infinitos sem repintar e sem blur de fundo.
+   Duração e movimento das animações são os mesmos do celular. O limite é o mesmo de LITE_QUERY em uno.perf.js. */
+@media (min-width: 901px) {
+    /* Símbolos: no tamanho normal e cada um em camada própria, para o navegador pintar uma vez só */
+    .fxpos { will-change: transform, opacity; }
+    /* Lateral 3D: 3 cópias em vez de 7 e um brilho só (o de 1 em de raio tinha ~200 px de blur) */
+    .fxsym b {
+        text-shadow: .03em .055em 0 var(--sd), .06em .11em 0 var(--sd), .09em .165em 0 var(--sd),
+            0 .22em .24em rgba(0, 0, 0, .45), 0 0 .75em color-mix(in srgb, var(--sc, #fff) 100%, transparent);
+    }
+    .fxsym.num b {
+        text-shadow: .03em .055em 0 var(--sd), .06em .11em 0 var(--sd), .09em .165em 0 var(--sd),
+            0 .22em .24em rgba(0, 0, 0, .45), 0 0 .55em color-mix(in srgb, var(--sc, #fff) 80%, transparent);
+    }
+    /* Mesma ideia nos símbolos em SVG: 3 filtros em vez de 11 */
+    .fxsym svg {
+        filter: drop-shadow(.09em .165em 0 var(--sd)) drop-shadow(0 .12em .14em rgba(0, 0, 0, .5))
+            drop-shadow(0 0 .65em color-mix(in srgb, var(--sc, #fff) 100%, transparent));
+    }
+    .fxsym.wheel svg { filter: drop-shadow(0 0 .22em rgba(255, 255, 255, .6)) drop-shadow(0 0 .6em rgba(255, 255, 255, .3)); }
+    /* Aura e anel: sem mix-blend-mode (obriga a compor o fundo todo a cada quadro) e com sombra menor */
+    .fxaura, .fxring { mix-blend-mode: normal; will-change: transform, opacity; }
+    .fxring { border-width: 6px; box-shadow: 0 0 22px 4px var(--ac); }
+    /* Brilhos infinitos: ficam acesos, sem animar filtro/sombra a cada quadro (que repinta tudo) */
+    .seat.uno .minihand, .seat.uno .nameplate { animation: none; filter: drop-shadow(0 0 12px #ff1744); }
+    .hand .uc.unocard { animation: none; box-shadow: 0 0 14px 4px rgba(255, 40, 80, .85); }
+    /* Leque mais alto: no PC ele ficava colado na borda de baixo do navegador */
+    .screen.game { padding-bottom: clamp(22px, 4.5vh, 48px); }
+    /* Sem desfoque do fundo nas janelas (blur em tela cheia é caro) */
+    .overlay { backdrop-filter: none; background: rgba(2, 8, 5, .8); }
+    .overlay:has(.colors) { background: rgba(2, 8, 5, .38); }
+}
+
+/* ===== Seta giratória da mesa (PC) =====
+   Só aparece em telas acima de 900 px (mesmo limite do modo leve, ver uno.perf.js). No celular fica a setinha ↻/↺ de sempre.
+   O círculo gira e o scale(1,.46) o achata numa elipse: a seta anda "deitada" sobre a mesa, rodeando monte e descarte.
+   O giro e o sentido vêm de uno.motion.js (transform gravado no HTML e atualizado a cada quadro); aqui só o desenho.
+   Setas em cor sólida (opacidade 100%, sem halo): a cor é a da mesa clareada um pouco (--rs) para aparecer bem sobre o feltro. */
+.dirring { display: none; }
+@media (min-width: 901px) {
+    .dirring {
+        --rs: color-mix(in srgb, var(--rc, #fff) 62%, #fff);
+        display: block; position: absolute; left: 50%; top: 56%; z-index: 0; pointer-events: none;
+        width: min(52%, 780px); aspect-ratio: 1;
+        will-change: transform;
+    }
+    .dirring svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .dirring path { fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 1; }
+    .dirring .rl { stroke: var(--rs); stroke-width: 10; }
+    .dirring .rh { fill: var(--rs); stroke: var(--rs); stroke-width: 6; }
+    /* A seta da mesa substitui a setinha do centro; a bolinha da cor atual continua */
+    .dirbox .dir { display: none; }
+}
+
+/* ===== +N menor e mais alto (PC) =====
+   No PC o +2/+4/+N ficava grande e em cima do monte de compra. Agora é ~27% menor e fica um pouco mais acima, centrado sobre o
+   descarte (o monte de compra fica à esquerda dele). O ponto é o mesmo em CSS (.pendingbig) e em JS (plusSpot em uno.animations.js):
+   x = centro da mesa + metade da carta - metade da bolinha de cor (11 px); y = 56% da mesa (altura do descarte) - 1,15 altura de carta. */
+@media (min-width: 901px) {
+    .fxsym.plus { font-size: clamp(84px, 19vmin, 168px); }
+    .pendingbig { left: calc(50% + var(--cw) * .5 - 11px); top: calc(56% - var(--cw) * 1.5 * 1.15); }
+}
+
+/* ===== Escolha direta no PC (sem janela) =====
+   Cor: a pizza que surge da carta fica clicável (só as fatias recebem o clique; o resto da caixa deixa passar).
+   Alvo do 7: o chip e o leque dos outros jogadores ficam clicáveis (.seat.pickable). */
+.fxpos.pickable { pointer-events: none; }
+/* A classe .pickable fica no .fxpos (pai do .fxsym), por isso o seletor parte dele: antes era ".fxsym.wheel.pickable", que nunca
+   casava, e as fatias continuavam sem receber clique (pointer-events herdado de #fx-layer = none). */
+.fxpos.pickable .fxsym.wheel svg g[data-c] { pointer-events: auto; cursor: pointer; }
+/* Desempenho: com a pizza clicável, o brilho não é mais um drop-shadow grande no <svg> (ele era refeito a cada mudança dentro do
+   SVG, inclusive no hover, e o blur chegava a ~170 px). Vira um halo estático de gradiente (barato) e o destaque da fatia é só
+   um contorno branco no topo dela, sem filtro nem transição. */
+.fxpos.pickable .fxsym.wheel svg { filter: none; }
+.fxpos.pickable .fxsym.wheel .tilt { position: relative; isolation: isolate; }
+.fxpos.pickable .fxsym.wheel .tilt::before {
+    content: ''; position: absolute; inset: -14% -12%; z-index: -1; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, .34), rgba(255, 255, 255, .12) 58%, rgba(255, 255, 255, 0) 100%);
+}
+.fxpos.pickable .fxsym.wheel svg g[data-c]:hover > path:last-child { stroke: #fff; stroke-width: 3.2; }
+.seat.pickable .nameplate, .seat.pickable .minihand { cursor: pointer; transition: transform .12s, background .12s, filter .12s; }
+.seat.pickable .nameplate { border-color: var(--gold); box-shadow: 0 0 0 2px #ffcc3355, 0 0 14px #ffcc3388; }
+.seat.pickable .minihand { filter: drop-shadow(0 0 6px #ffcc33aa); }
+.seat.pickable:hover .nameplate { background: #1f4a36; transform: scale(1.07); }
+.seat.pickable:hover .minihand { filter: drop-shadow(0 0 12px #ffcc33); transform: scale(1.05); }

@@ -1,0 +1,31 @@
+{
+  "name": "@bardotiao/uno",
+  "version": "1.0.0",
+  "description": "Jogo Uno (versão paródia \"UMA\") do Bar do Tião: client e servidor.",
+  "exports": {
+    "./client": "./client/index.js",
+    "./server": "./server/index.js",
+    "./server/*": "./server/*.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "dev": "node dev/run.mjs"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheCics/uno.git"
+  },
+  "files": [
+    "client",
+    "server"
+  ],
+  "peerDependencies": {
+    "@bardotiao/ui": "*",
+    "@bardotiao/game-contract": "*"
+  },
+  "devDependencies": {
+    "@bardotiao/ui": "github:TheCics/ui#v1.0.0",
+    "@bardotiao/game-contract": "github:TheCics/game-contract#v1.0.0"
+  }
+}
